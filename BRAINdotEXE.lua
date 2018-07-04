@@ -1,5 +1,105 @@
 if GetObjectName(GetMyHero()) ~= "Pyke" then return end
-	
+local castSpell = {state = 0, tick = LocalGetTickCount(), casting = LocalGetTickCount() - 1000, mouse = mousePos}
+function CastSpell(spell,pos,range,delay)
+    local range = range or _huge
+    local delay = delay or 250
+    local ticker = LocalGetTickCount()
+
+	if castSpell.state == 0 and GetDistance(myHero.pos,pos) < range and ticker - castSpell.casting > delay + LocalGameLatency() and pos:ToScreen().onScreen then
+		castSpell.state = 1
+		castSpell.mouse = mousePos
+		castSpell.tick = ticker
+	end
+	if castSpell.state == 1 then
+		if ticker - castSpell.tick < LocalGameLatency() then
+			LocalControlSetCursorPos(pos)
+			LocalControlKeyDown(spell)
+			LocalControlKeyUp(spell)
+			castSpell.casting = ticker + delay
+			DelayAction(function()
+				if castSpell.state == 1 then
+					LocalControlSetCursorPos(castSpell.mouse)
+					castSpell.state = 0
+				end
+			end,LocalGameLatency()/1000)
+		end
+		if ticker - castSpell.casting > LocalGameLatency() then
+			LocalControlSetCursorPos(castSpell.mouse)
+			castSpell.state = 0
+		end
+	end
+end
+
+function CastSpellMM(spell,pos,range,delay)
+local range = range or _huge
+local delay = delay or 250
+local ticker = LocalGetTickCount()
+	if castSpell.state == 0 and GetDistance(myHero.pos,pos) < range and ticker - castSpell.casting > delay + LocalGameLatency() then
+		castSpell.state = 1
+		castSpell.mouse = mousePos
+		castSpell.tick = ticker
+	end
+	if castSpell.state == 1 then
+		if ticker - castSpell.tick < LocalGameLatency() then
+			local castPosMM = pos:ToMM()
+			LocalControlSetCursorPos(castPosMM.x,castPosMM.y)
+			LocalControlKeyDown(spell)
+			LocalControlKeyUp(spell)
+			castSpell.casting = ticker + delay
+			DelayAction(function()
+				if castSpell.state == 1 then
+					LocalControlSetCursorPos(castSpell.mouse)
+					castSpell.state = 0
+				end
+			end,LocalGameLatency()/1000)
+		end
+		if ticker - castSpell.casting > LocalGameLatency() then
+			LocalControlSetCursorPos(castSpell.mouse)
+			castSpell.state = 0
+		end
+	end
+end
+
+function ReleaseSpell(spell,pos,range,delay)
+    local delay = delay or 250
+    local ticker = LocalGetTickCount()
+	if castSpell.state == 0 and GetDistance(myHero.pos,pos) < range and ticker - castSpell.casting > delay + LocalGameLatency() then
+		castSpell.state = 1
+		castSpell.mouse = mousePos
+		castSpell.tick = ticker
+	end
+	if castSpell.state == 1 then
+		if ticker - castSpell.tick < LocalGameLatency() then
+			if not pos:ToScreen().onScreen then
+				pos = myHero.pos + Vector(myHero.pos,pos):Normalized() * _random(530,760)
+				LocalControlSetCursorPos(pos)
+				LocalControlKeyUp(spell)
+			else
+				LocalControlSetCursorPos(pos)
+				LocalControlKeyUp(spell)
+			end
+			castSpell.casting = ticker + delay
+			DelayAction(function()
+				if castSpell.state == 1 then
+					LocalControlSetCursorPos(castSpell.mouse)
+					castSpell.state = 0
+				end
+			end,LocalGameLatency()/1000)
+		end
+		if ticker - castSpell.casting > LocalGameLatency() then
+			LocalControlSetCursorPos(castSpell.mouse)
+			castSpell.state = 0
+		end
+	end
+end
+
+local 	BDE = MenuElement({id = "BDE", name = "Brain.exe "..myHero.charName, type = MENU})
+		BDE:MenuElement({id = "Combo", name = "Combo", type = MENU})
+		BDE:MenuElement({id = "Killsteal", name = "Killsteal", type = MENU})
+		BDE:MenuElement({id = "Drawings", name = "Drawings", type = MENU})
+		BDE:MenuElement({id = "Prediction", name = "Hitchance Manager", type = MENU})
+
+class "Pyke"	
 require('Inspired')
 require('DeftLib')
 require('IPrediction')
