@@ -1,5 +1,4 @@
 local Addons = {"Pyke"}
-local Started = false
 function OnLoad()
 	if table.contains(Addons,myHero.charName) and Started == false then
 		_G[myHero.charName]()
